@@ -1,0 +1,1191 @@
+<html class="scroll-smooth" lang="en" vid="0"><head vid="1">
+<meta charset="utf-8" vid="2"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport" vid="3"/>
+<title vid="4">START Labs | MedTech</title>
+<script src="https://cdn.tailwindcss.com/3.4.17" vid="5"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&amp;family=JetBrains+Mono:wght@400;700&amp;family=Montserrat:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet" vid="6"/>
+<script vid="7">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#0A0A0F',
+                        accent: '#2c59c3',
+                        surface: '#12121A',
+                    },
+                    fontFamily: {
+                        sans: ['Avenir Next LT Pro', 'Montserrat', 'Inter', 'system-ui', 'sans-serif'],
+                        display: ['Avenir Next LT Pro', 'Montserrat', 'Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    letterSpacing: {
+                        tightest: '-.075em',
+                        widest: '.25em',
+                    },
+                    backgroundImage: {
+                        'grid-pattern': 'linear-gradient(to right, #1f2937 1px, transparent 1px), linear-gradient(to bottom, #1f2937 1px, transparent 1px)',
+                    }
+                }
+            }
+        }
+    </script>
+<style vid="8">
+        body {
+            background-color: #0A0A0F;
+            color: #F3F4F6;
+            overflow-x: hidden;
+        }
+
+        .noise::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .scanlines::after { display: none; } .scanlines_DISABLED::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 40;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px;
+            opacity: 0.15;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .diagnose-container {
+            position: relative;
+        }
+        .diagnose-box {
+            position: absolute;
+            border: 1px solid #2C59C3;
+            opacity: 0;
+            transition: all 0.5s ease-out;
+            box-shadow: 0 0 10px rgba(44, 89, 195, 0.2) inset, 0 0 10px rgba(44, 89, 195, 0.2);
+        }
+        .diagnose-box::before, .diagnose-box::after {
+            content: '';
+            position: absolute;
+            width: 8px; height: 8px;
+            border-color: #2C59C3;
+            border-style: solid;
+        }
+        .diagnose-box::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+        .diagnose-box::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+        .diagnose-container.active .diagnose-box { opacity: 1; }
+        
+        .box-1 { top: 20%; left: 15%; width: 40%; height: 50%; transition-delay: 0.2s; }
+        .box-2 { top: 30%; right: 20%; width: 30%; height: 40%; transition-delay: 0.4s; }
+        .box-3 { top: 10%; left: 20%; width: 60%; height: 70%; transition-delay: 0.3s; }
+
+        @keyframes hero-scan-anim {
+            0% { top: 0; opacity: 0; }
+            5% { opacity: 1; }
+            45% { top: 54%; transform: scaleX(1); }
+            50% { top: 54%; transform: scaleX(1.1); }
+            55% { top: 54%; transform: scaleX(1); }
+            95% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        @keyframes flicker {
+            0% { opacity: 1; }
+            48% { opacity: 1; }
+            50% { opacity: 0.7; }
+            51% { opacity: 1; }
+            52% { opacity: 0.8; }
+            54% { opacity: 1; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes label-fade {
+            0%, 45% { opacity: 0; transform: translateY(10px); }
+            50%, 65% { opacity: 1; transform: translateY(0); }
+            70%, 100% { opacity: 0; transform: translateY(-10px); }
+        }
+
+        .hero-scan-line {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #2C59C3;
+            box-shadow: 0 0 15px 2px rgba(44, 89, 195, 0.8);
+            z-index: 25;
+            pointer-events: none;
+            animation: hero-scan-anim 6s infinite ease-in-out;
+        }
+
+        .hero-flicker-layer {
+            animation: flicker 6s infinite;
+        }
+
+        .scan-label {
+            animation: label-fade 6s infinite;
+        }
+
+
+        .manifest-row {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        .manifest-watermark {
+            position: absolute;
+            left: -0.15em;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 9rem;
+            font-weight: 900;
+            line-height: 1;
+            color: rgba(255,255,255,0.04);
+            font-family: inherit;
+            letter-spacing: -0.05em;
+            pointer-events: none;
+            user-select: none;
+            transition: color 0.3s ease;
+        }
+        .manifest-row:hover .manifest-watermark {
+            color: rgba(44, 89, 195,0.08);
+        }
+        #manifest {
+            border-top: 0.5px solid rgba(255,255,255,0.1);
+        }
+        .manifest-row {
+            gap: 2rem;
+            border-bottom: 0.5px solid rgba(255,255,255,0.1);
+            padding: 1.25rem 0;
+            cursor: default;
+            transition: opacity 0.2s ease;
+        }
+        #manifest:hover .manifest-row {
+            opacity: 0.35;
+        }
+        #manifest:hover .manifest-row:hover {
+            opacity: 1;
+        }
+        .manifest-value {
+            font-size: 1.5rem;
+            color: #ffffff;
+            letter-spacing: -0.01em;
+            white-space: nowrap;
+        }
+        .manifest-value--accent {
+            color: #2C59C3;
+        }
+
+        .manifest-value-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            text-align: right;
+            margin-left: auto;
+        }
+        .manifest-desc {
+            font-size: clamp(0.8rem, 1.2vw, 1rem);
+            color: rgba(255,255,255,0.4);
+            font-family: monospace;
+            letter-spacing: 0.04em;
+        }
+        @media (max-width: 640px) {
+            .manifest-row { flex-wrap: wrap; gap: 0.5rem; }
+        }
+
+        .milestone-rail::-webkit-scrollbar {
+            height: 4px;
+        }
+        .milestone-rail::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .milestone-rail::-webkit-scrollbar-thumb {
+            background: #2C59C3;
+        }
+    
+        .carousel-scroll {
+            scrollbar-width: thin; scroll-behavior: smooth;
+            scrollbar-color: #2C59C3 transparent;
+        }
+        .carousel-scroll::-webkit-scrollbar {
+            height: 4px;
+        }
+        .carousel-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .carousel-scroll::-webkit-scrollbar-thumb {
+            background: linear-gradient(90deg, #2C59C3, #003087);
+            border-radius: 999px;
+        }
+        .carousel-scroll::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(90deg, #5a82e0, #a855f7);
+        }
+
+        .mesh-gradient-dark {
+            background-color: #0A0A0F;
+            background-image: 
+                radial-gradient(at 10% 20%, hsla(221, 63%, 47%, 0.15) 0px, transparent 50%),
+                radial-gradient(at 90% 10%, hsla(220, 100%, 27%, 0.12) 0px, transparent 50%),
+                radial-gradient(at 50% 50%, hsla(221, 63%, 47%, 0.05) 0px, transparent 50%),
+                radial-gradient(at 80% 90%, hsla(220, 100%, 27%, 0.1) 0px, transparent 50%),
+                radial-gradient(at 20% 80%, hsla(221, 63%, 47%, 0.08) 0px, transparent 50%);
+        }
+
+
+        .why-architecture-shell {
+            max-width: 980px;
+            margin: 0 auto;
+        }
+        .why-architecture-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .why-architecture-title {
+            font-family: 'Montserrat', 'Inter', sans-serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            line-height: 0.95;
+            letter-spacing: -0.05em;
+            text-transform: uppercase;
+            color: #fff;
+            margin: 0;
+        }
+        .why-architecture-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1.5rem;
+            background: transparent;
+            border: none;
+            align-items: stretch;
+        }
+        .why-architecture-card {
+            position: relative;
+            overflow: hidden;
+            background: #0A0A0F;
+            text-align: left;
+            transition: background 0.35s ease;
+            border-radius: 4px;
+            aspect-ratio: 1 / 1;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .why-architecture-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top right, rgba(44, 89, 195,0.12), transparent 55%);
+            opacity: 0;
+            transition: opacity 0.35s ease;
+            pointer-events: none;
+        }
+        .why-architecture-card:hover {
+            background: #12121A;
+        }
+        .why-architecture-card:hover::before {
+            opacity: 1;
+        }
+        .why-architecture-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #2C59C3;
+            transition: width 0.35s ease;
+        }
+        .why-architecture-card:hover .why-architecture-line {
+            width: 100%;
+        }
+        .why-architecture-number {
+            font-family: Georgia, serif;
+            font-size: 3rem;
+            line-height: 1;
+            color: rgba(255,255,255,0.18);
+            margin-bottom: 1.25rem;
+            transition: color 0.35s ease;
+        }
+        .why-architecture-card:hover .why-architecture-number {
+            color: #2C59C3;
+        }
+        .why-architecture-card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fff;
+            margin: 0 0 0.75rem 0;
+        }
+        .why-architecture-card p {
+            margin: 0;
+            color: #9CA3AF;
+            font-size: 0.98rem;
+            line-height: 1.65;
+        }
+        .why-architecture-card-bg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.15;
+            mix-blend-mode: normal;
+            z-index: 0;
+            transition: opacity 0.35s ease, transform 0.5s ease;
+        }
+        .why-architecture-card:hover .why-architecture-card-bg {
+            opacity: 0.25;
+            transform: scale(1.03);
+        }
+        .why-architecture-card > *:not(.why-architecture-card-bg):not(.why-architecture-line),
+        .why-architecture-card .why-architecture-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .difference-compare-wrap {
+            max-width: 1120px;
+            margin: 0 auto;
+        }
+        .difference-compare-grid {
+            display: grid;
+            grid-template-columns: 1fr 2rem 1fr;
+            gap: 0;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0;
+            overflow: visible;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.35);
+        }
+        .difference-divider {
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.16), transparent);
+        }
+        .difference-panel {
+            position: relative;
+            padding: 2rem;
+            min-height: 350px;
+            background: #0d0d14;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0;
+        }
+        .difference-panel--muted {
+            opacity: 0.62;
+            filter: grayscale(1);
+        }
+        .difference-panel--accent::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top right, rgba(44, 89, 195,0.14), transparent 55%);
+            pointer-events: none;
+        }
+        .difference-header {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .difference-title {
+            font-family: 'Avenir Next LT Pro', 'Montserrat', 'Inter', sans-serif;
+            font-size: clamp(1.9rem, 3vw, 2.6rem);
+            line-height: 1;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            text-transform: uppercase;
+            color: #fff;
+            margin: 0.5rem 0 0 0;
+        }
+        .difference-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        .difference-list li {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 1rem;
+            align-items: start;
+        }
+        .difference-list--typical li::before {
+            content: '×';
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.05rem;
+            color: rgba(255,255,255,0.28);
+            line-height: 1;
+            margin-top: 0.15rem;
+        }
+        .difference-list--start li::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: #2C59C3;
+            box-shadow: 0 0 10px rgba(44, 89, 195,0.9);
+            margin-top: 0.45rem;
+        }
+        .difference-list h4 {
+            font-family: 'Avenir Next LT Pro', 'Montserrat', 'Inter', sans-serif;
+            font-size: 1rem;
+            line-height: 1.2;
+            font-weight: 700;
+            color: #fff;
+            margin: 0 0 0.35rem 0;
+            text-transform: uppercase;
+            letter-spacing: -0.01em;
+        }
+        .difference-list p {
+            margin: 0;
+            color: #9CA3AF;
+            font-size: 0.95rem;
+            line-height: 1.65;
+        }
+        @media (max-width: 900px) {
+            .why-architecture-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                background: transparent;
+                border: none;
+            }
+            .why-architecture-card {
+                aspect-ratio: 1 / 1;
+                border-radius: 4px;
+                height: 260px;
+                padding: 1.5rem 1rem;
+                border: 1px solid rgba(255,255,255,0.08);
+            }
+            .why-architecture-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .difference-compare-grid {
+                grid-template-columns: 1fr;
+            }
+            .difference-divider {
+                width: 100%;
+                height: 1px;
+                background: linear-gradient(to right, transparent, rgba(255,255,255,0.16), transparent);
+            }
+            .difference-panel {
+                min-height: auto;
+            }
+        }
+
+</style>
+</head>
+<body class="noise antialiased selection:bg-accent selection:text-white" vid="9">
+<div style="position:fixed;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#FF2D78 30%,#003087 70%,transparent);z-index:100;opacity:0.6;pointer-events:none;"></div>
+<header class="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between border-b border-white/10 backdrop-blur-md" style="background:rgba(10,10,15,0.8);" vid="10">
+<div class="flex items-center gap-3" vid="11">
+<span class="text-xl font-black tracking-tighter text-white uppercase" vid="12">START Labs</span>
+
+<span class="hidden md:inline-flex items-center text-[10px] font-mono text-white uppercase tracking-widest px-3 py-1.5 border border-white/10 bg-black" vid="13">
+    MedTech Edition
+</span></div>
+<nav class="hidden md:flex items-center gap-8" vid="14">
+<a class="font-mono text-xs text-white/70 hover:text-white uppercase tracking-wider transition-colors px-3 py-2 rounded-lg hover:bg-white/5" href="#about" vid="15">About</a>
+<a class="font-mono text-xs text-white/70 hover:text-white uppercase tracking-wider transition-colors px-3 py-2 rounded-lg hover:bg-white/5" href="#program" vid="16">Program</a>
+<a class="font-mono text-xs text-white/70 hover:text-white uppercase tracking-wider transition-colors px-3 py-2 rounded-lg hover:bg-white/5" href="#apply" vid="17">Apply</a>
+</nav>
+<a class="group px-5 py-2.5 bg-accent text-white font-mono text-xs uppercase tracking-wider hover:bg-white hover:text-dark transition-all duration-300 rounded-none border border-accent" href="#apply" vid="18">Apply Now</a>
+</header>
+<section class="relative w-full h-screen flex flex-col justify-center items-center overflow-hidden pt-20" vid="19">
+<div class="hero-scan-line" vid="20">
+<div class="absolute left-10 -top-6 scan-label font-mono text-[10px] text-accent tracking-[0.3em] font-bold bg-dark/80 px-2 py-1 border border-accent/30" vid="21">
+                SIGNAL ACQUIRED
+            </div>
+</div>
+<div class="absolute inset-0 z-0 hero-flicker-layer" vid="22">
+<img alt="Brain Scan" class="w-full h-full object-cover opacity-30 mix-blend-luminosity filter grayscale contrast-150" src="https://images.unsplash.com/photo-1559757175-5700dde675bc?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=2850&amp;q=80" vid="23"/>
+<div class="absolute inset-0 bg-gradient-to-b from-dark/80 via-dark/40 to-dark" vid="24"></div>
+<div class="absolute top-10 left-10 font-mono text-[10px] text-accent/50 hidden md:block" vid="25">
+
+            </div>
+<div class="absolute top-1/2 left-0 w-full h-[1px] bg-white/5" vid="30"></div>
+<div class="absolute top-0 left-1/2 w-[1px] h-full bg-white/5" vid="31"></div>
+</div>
+<div class="relative z-10 text-center px-4 max-w-5xl mx-auto mt-20" vid="32">
+<h1 class="text-6xl md:text-8xl lg:text-9xl font-black tracking-tightest uppercase mb-12 text-white reveal" style="line-height: 0.9;" vid="33">
+                Are you<br vid="34"/>
+<span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-gray-500" vid="35">cracked</span><br vid="36"/>
+                enough?
+            </h1>
+<a class="reveal inline-flex items-center justify-center px-8 py-4 bg-accent text-white font-bold tracking-widest uppercase text-sm border border-accent hover:bg-transparent hover:text-accent transition-all duration-300 group rounded-none" href="#apply" vid="37">
+                Apply now
+                
+</a>
+</div>
+</section>
+<section class="py-16 px-6 md:px-12 lg:px-24 border-t border-white/10" style="background:#0d0d14;" vid="40">
+<div class="max-w-7xl mx-auto">
+<div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16" vid="44">
+<div class="flex items-center gap-4" vid="45">
+<span class="font-mono text-xs text-gray-500 uppercase tracking-widest" vid="46">Organized By</span>
+<a href="https://www.startmunich.de/" style="display:inline-block;" target="_blank"><img alt="START Munich" onmouseout="this.style.transform='scale(1)'" onmouseover="this.style.transform='scale(1.1)'" 
+src="https://raw.githubusercontent.com/genepearl/start-labs-2026/main/images/startmunich.png"
+style="height:60px; width:auto; display:block; mix-blend-mode:screen; transition:transform 0.2s ease; cursor:pointer;"/></a>
+<span class="font-mono text-xs text-gray-500 uppercase tracking-widest" vid="46">x</span>
+<a href="https://www.one-aim.org/" target="_blank"><img alt="OneAIM" onmouseout="this.style.transform='scale(1)'" onmouseover="this.style.transform='scale(1.1)'" 
+src="https://raw.githubusercontent.com/genepearl/start-labs-2026/main/images/oneaim.png"
+style="height:46px; width:auto; display:block; mix-blend-mode:screen; transition:transform 0.2s ease; cursor:pointer;"
+
+class="transition-transform duration-300 hover:scale-110 filter invert brightness-0"></a>
+
+</a></div>
+</div></div></section>
+
+<section class="border-t border-white/10 relative z-10 pb-16" style="background:#0d0d14;">
+  <div class="max-w-6xl mx-auto px-6 md:px-12 lg:px-24">
+
+    <!-- header -->
+    <div class="py-16 text-center">
+      <h2 class="text-4xl md:text-6xl font-black tracking-tightest uppercase text-white">The Problem</h2>
+      <span class="font-mono text-accent text-sm tracking-widest uppercase block mt-4">Why do we exist?</span>
+    </div>
+
+    <!-- split row -->
+    <div class="flex flex-col lg:flex-row items-start  border-white/10">
+
+      <!-- LEFT -->
+      <div class="flex-1 bg-white/[0.02] p-12 lg:py-24 lg:pr-20 border-r border-white/10 flex justify-end">
+        <div class="max-w-[420px] w-full">
+          <h4 class="text-2xl font-black uppercase tracking-tight text-white mb-20 leading-tight group-hover:text-accent">
+            Germany has world-class medicine.
+          </h4>
+          <h2 class="text-3xl md:text-4xl font-black uppercase tracking-tight leading-tight text-accent mb-3">
+            Digital infrastructure?
+          </h2>
+          <h2 class="text-3xl md:text-4xl font-black uppercase tracking-tight leading-tight text-white mb-3">
+            Prehistoric.
+          </h2>
+        </div>
+      </div>
+
+
+      <!-- RIGHT — dino only -->
+    <div class="flex-shrink-0 lg:w-[500px] flex items-center justify-center group">
+        <img
+            src="https://raw.githubusercontent.com/genepearl/start-labs-2026/main/images/dino.png"
+            alt="Wireframe dinosaur with fax machine"
+            class="w-[65%] h-auto opacity-90 mt-5 group-hover:-translate-x-2 transition-transform duration-500"
+        >
+    </div>
+
+  </div>
+</section>
+
+<section id="about" class="border-t border-white/10 pt-24 relative z-10" style="background:#0d0d14;">
+    <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(44,89,195,0.35) 0%, rgba(20,50,140,0.15) 50%, transparent 100%);"></div>
+    <div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image: radial-gradient(#2C59C3 1px, transparent 1px); background-size: 40px 40px;"></div>
+    
+    <!-- Centered background image -->
+    <div class="absolute inset-0 pointer-events-none" style="display:flex; align-items:center; justify-content:center; z-index:0;">
+        <img src="https://raw.githubusercontent.com/genepearl/start-labs-2026/main/images/rocket.png" alt="" style="height:75%; width:auto; object-fit:contain; opacity:0.1; mix-blend-mode:screen;" />
+    </div>
+
+    <div class="max-w-6xl mx-auto px-6 md:px-12 lg:px-24 text-center relative" style="z-index:1;">
+    <div class="reveal">
+
+        <div class="mb-12 text-center">
+            <h2 class="text-4xl md:text-6xl font-black tracking-tightest uppercase text-white">the solution</h2>
+            <span class="font-mono text-accent text-sm tracking-widest uppercase block mt-4">What is START Labs?</span>
+        </div>
+
+        <div id="manifest">
+            <div class="manifest-row">
+                <div class="manifest-watermark">01</div>
+                <div class="manifest-value-wrap">
+                    <span class="manifest-value font-black uppercase">8 Weeks</span>
+                    <span class="text-base text-gray-400 font-light leading-relaxed">Build and sell.</span>
+                </div>
+            </div>
+            <div class="manifest-row">
+                <div class="manifest-watermark">02</div>
+                <div class="manifest-value-wrap">
+                    <span class="manifest-value font-black uppercase">Student-Run Incubator</span>
+                    <span class="text-base text-gray-400 font-light leading-relaxed">No bureaucracy. Just execution.</span>
+                </div>
+            </div>
+            <div class="manifest-row">
+                <div class="manifest-watermark">03</div>
+                <div class="manifest-value-wrap">
+                    <span class="manifest-value font-black uppercase">Real-World Problems</span>
+                    <span class="text-base text-gray-400 font-light leading-relaxed">No hypothetical fake cases.</span>
+                </div>
+            </div>
+            <div class="manifest-row manifest-row--last">
+                <div class="manifest-watermark">04</div>
+                <div class="manifest-value-wrap">
+                    <span class="manifest-value manifest-value--accent font-black uppercase">Startup</span>
+                    <span class="text-base text-gray-400 font-light leading-relaxed">A product with real demand.</span>
+                </div>
+            </div>
+        </div><!-- end manifest -->
+
+        <div class="pb-16 md:pb-24"></div>
+    </div>
+    </div>
+</section>
+
+<section id="profiles" class="border-b pb-16 border-white/10 relative z-10" style="background:#0d0d14;">
+  <div class="max-w-6xl mx-auto px-6 md:px-12 lg:px-24">
+    
+    <!-- Header -->
+    <div class="mb-16 text-center">
+      <h2 class="text-4xl md:text-6xl font-black tracking-tightest uppercase text-white">Two Profiles</h2>
+      <span class="font-mono text-accent text-sm tracking-widest uppercase block mt-4">Who are you?</span>
+    </div>
+
+    <!-- Cards row — side by side on desktop, stacked on mobile -->
+    <div class="flex flex-col lg:flex-row items-stretch relative">
+
+      <!-- divider + OR (desktop only) -->
+      <div class="hidden lg:block absolute left-1/2 top-0 bottom-0 w-[1px] bg-white/10 -translate-x-1/2 z-10"></div>
+      <div class="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 bg-[#0d0d14] border border-white/10 items-center justify-center z-20 font-mono text-accent text-xs tracking-widest">OR</div>
+
+      <!-- Card A -->
+      <div class="flex-1 p-8 lg:py-24 lg:pr-20 bg-white/[0.02] flex justify-center lg:justify-end group border border-white/10 lg:border-0">
+        <div class="max-w-[420px] w-full">
+          <div class="flex items-center gap-4 mb-8">
+            <div class="h-px w-10 bg-white/10 group-hover:bg-accent transition-colors"></div>
+            <span class="font-mono text-gray-500 text-[11px] uppercase tracking-[0.2em] group-hover:text-accent">Profile Type A</span>
+          </div>
+          <h2 class="text-3xl md:text-4xl font-black uppercase tracking-tight leading-tight mb-6 text-white group-hover:text-accent transition-colors">Healthcare<br>Partner</h2>
+          <div class="font-mono text-xs text-white mb-8 uppercase tracking-[0.15em] border border-white/10 inline-block px-4 py-2 bg-black group-hover:border-white">Domain Expert</div>
+          <p class="text-base text-gray-400 font-light leading-relaxed">Knows the problem inside out, but lacks the technical skills to build a solution.</p>
+        </div>
+      </div>
+
+      <!-- Mobile OR divider -->
+      <div class="flex lg:hidden items-center justify-center py-6 relative">
+        <div class="absolute inset-x-0 top-1/2 h-px bg-white/10"></div>
+        <div class="w-14 h-14 bg-[#0d0d14] border border-white/10 flex items-center justify-center z-10 font-mono text-accent text-xs tracking-widest">OR</div>
+      </div>
+
+      <!-- Card B -->
+      <div class="flex-1 p-8 lg:py-24 lg:pl-20 flex justify-center lg:justify-start group border border-white/10 lg:border-0" style="background:#0d0d14;">
+        <div class="max-w-[420px] w-full flex flex-col items-end text-right">
+          <div class="flex items-center gap-4 mb-8">
+            <span class="font-mono text-gray-500 text-[11px] uppercase tracking-[0.2em] group-hover:text-accent">Profile Type B</span>
+            <div class="h-px w-10 bg-white/10 group-hover:bg-accent transition-colors"></div>
+          </div>
+          <h2 class="text-3xl md:text-4xl font-black uppercase tracking-tight leading-tight mb-6 text-white group-hover:text-accent transition-colors">The<br>Builder</h2>
+          <div class="font-mono text-xs text-white mb-8 uppercase tracking-[0.15em] border border-white/10 inline-block px-4 py-2 bg-white/[0.03] group-hover:border-white">Technical Talent</div>
+          <p class="text-base text-gray-400 font-light leading-relaxed">Knows how to build fast, but struggles to find a problem worth solving.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="mission" class="border-t border-white/10 pt-24 relative z-10" style="background:#0d0d14;">
+    <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(44,89,195,0.35) 0%, rgba(20,50,140,0.15) 50%, transparent 100%);"></div>
+    <div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image: radial-gradient(#2C59C3 1px, transparent 1px); background-size: 40px 40px;" vid="99"></div>
+    <div class="max-w-6xl mx-auto text-center" vid="100">
+    <div class="reveal" vid="101">
+    <div class="max-w-[1600px] mx-auto px-6 lg:px-12" style="position:relative;z-index:2;">
+        <div class="mb-12 text-center">
+            <h2 class="text-4xl md:text-6xl font-black tracking-tightest uppercase text-white">one mission</h2>
+            <span class="font-mono text-accent text-sm tracking-widest uppercase block mt-4">What is the point?</span>
+        </div>
+        <h4 class="text-2xl font-black uppercase tracking-tight text-white mb-6 leading-tight">
+            START LABS closes the gap.
+        </h4>
+    </div>
+
+
+    <!-- IMAGE PLACEHOLDER -->
+    
+    <div class="flex justify-center mb-6 px-6">
+    <div style="position:relative;width:min(90vw,900px);aspect-ratio:25/9;margin-top:20px;">
+        <div style="position:absolute;inset:0;border:1px solid rgba(44,89,195,0.3);pointer-events:none;z-index:3;"></div>
+
+        <div style="position:absolute;top:-2px;left:-2px;width:20px;height:20px;border-top:2px solid #2C59C3;border-left:2px solid #2C59C3;pointer-events:none;z-index:4;"></div>
+        <div style="position:absolute;top:-2px;right:-2px;width:20px;height:20px;border-top:2px solid #2C59C3;border-right:2px solid #2C59C3;pointer-events:none;z-index:4;"></div>
+        <div style="position:absolute;bottom:-2px;left:-2px;width:20px;height:20px;border-bottom:2px solid #2C59C3;border-left:2px solid #2C59C3;pointer-events:none;z-index:4;"></div>
+        <div style="position:absolute;bottom:-2px;right:-2px;width:20px;height:20px;border-bottom:2px solid #2C59C3;border-right:2px solid #2C59C3;pointer-events:none;z-index:4;"></div>
+            <div style="position:absolute;inset:10px;overflow:hidden;background:#14141e;">
+                <img
+            src="https://raw.githubusercontent.com/genepearl/start-labs-2026/main/images/labsbanner.JPG"
+            alt="Wireframe dinosaur with fax machine"
+            class="block w-full object-cover">
+                 </div>
+
+            <div class="mission-side-left" style="position:absolute;top:50%;left:-20px;transform:translateY(-50%);width:40px;height:60%;display:flex;flex-direction:column;justify-content:space-between;align-items:center;padding:10px 0;background:rgba(13,13,20,0.8);backdrop-filter:blur(4px);border:1px solid rgba(44,89,195,0.3);border-right:none;z-index:5;">
+                <div style="writing-mode:vertical-rl;font-size:0.6rem;color:#8a8a9a;letter-spacing:2px;transform:rotate(180deg);">FREQ_89.2</div>
+                <div style="writing-mode:vertical-rl;font-size:0.6rem;color:#8a8a9a;letter-spacing:2px;transform:rotate(180deg);">SYNC_OK</div>
+            </div>
+
+            <div class="mission-side-right" style="position:absolute;top:50%;right:-20px;transform:translateY(-50%);width:40px;height:60%;display:flex;flex-direction:column;justify-content:space-between;align-items:center;padding:10px 0;background:rgba(13,13,20,0.8);backdrop-filter:blur(4px);border:1px solid rgba(44,89,195,0.3);border-left:none;z-index:5;">
+                <div style="writing-mode:vertical-rl;font-size:0.6rem;color:#8a8a9a;letter-spacing:2px;transform:rotate(180deg);">OUTPUT_MAX</div>
+                <div style="writing-mode:vertical-rl;font-size:0.6rem;color:#8a8a9a;letter-spacing:2px;transform:rotate(180deg);">BLD_CORE</div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+      @media (max-width: 768px) {
+        .mission-side-left, .mission-side-right { display:none !important; }
+      }
+    </style>
+
+
+    
+<div class="text-center p-12 lg:py-16 flex flex-col justify-end mb-16">
+    <!-- Desktop: inline -->
+    <h2 class="hidden md:block text-3xl md:text-4xl font-black uppercase tracking-tight leading-tight mb-6">
+        <span class="text-accent">Real problems</span>
+        <span class="text-white" style="border-bottom: 2px solid #2C59C3; padding-bottom: 4px;">meet</span>
+        <span class="text-accent">Real builders</span>
+    </h2>
+    <!-- Mobile: stacked -->
+    <h2 class="block md:hidden text-3xl font-black uppercase tracking-tight leading-tight mb-6">
+        <span class="text-accent block">Real problems</span>
+        <span class="text-white" style="border-bottom: 2px solid #2C59C3; padding-bottom: 4px; display: inline-block;">meet</span>
+        <span class="text-accent block">Real builders</span>
+    </h2>
+</div>
+
+
+<style>
+  /* ── PROOF SECTION STYLES ── */
+  #proof {
+    position: relative;
+    overflow: hidden;
+  }
+  /* Stats grid — full bleed, borderless cell system */
+  .proof-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    text-align: center;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    border-left: 1px solid rgba(255,255,255,0.08);
+    position: relative;
+    z-index: 2;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+    @media (max-width: 768px) {
+    .proof-stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .proof-stats-grid .proof-stat:nth-child(1) { order: 1; }
+    .proof-stats-grid .proof-stat:nth-child(2) { order: 3; grid-column: 1 / -1; }
+    .proof-stats-grid .proof-stat:nth-child(3) { order: 2; }
+    }
+  .proof-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+    border-right: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    background: #0d0d14;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+    cursor: default;
+  }
+  .proof-stat::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(44,89,195,0.07);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .proof-stat:hover::after { opacity: 1; }
+  .proof-stat:hover { border-color: #2C59C3; }
+  .proof-stat-num {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin-bottom: 12px;
+    transition: color 0.3s;
+    position: relative; z-index: 1;
+  }
+  .proof-stat:hover .proof-stat-num { color: #2C59C3; }
+  .proof-stat.featured .proof-stat-num { color: #2C59C3; }
+  .proof-stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 4px 10px;
+    background: #000;
+    position: relative; z-index: 1;
+  }
+  /* Divider with label */
+  .proof-divider {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 56px 0 40px;
+    position: relative; z-index: 2;
+  }
+  .proof-divider::before, .proof-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.08);
+  }
+  .proof-divider span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #2C59C3;
+    white-space: nowrap;
+  }
+  /* Project cards — full-bleed grid */
+  .proof-projects-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    border-left: 1px solid rgba(255,255,255,0.08);
+    position: relative; z-index: 2;
+  }
+  @media (max-width: 768px) {
+    .proof-projects-grid { grid-template-columns: 1fr; }
+  }
+  .proof-card {
+    border-right: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 40px 32px;
+    background: #0d0d14;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+    cursor: default;
+  }
+  .proof-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: #2C59C3;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+  }
+  .proof-card:hover::before { transform: scaleX(1); }
+  .proof-card:hover { border-color: rgba(44,89,195,0.35); }
+  /* Corner brackets on hover */
+  .proof-card-corner-br, .proof-card-corner-bl {
+    position: absolute;
+    width: 10px; height: 10px;
+    border-color: rgba(44,89,195,0.4);
+    border-style: solid;
+    opacity: 0;
+    transition: opacity 0.3s;
+    bottom: 10px;
+  }
+  .proof-card-corner-br { right: 10px; border-width: 0 1px 1px 0; }
+  .proof-card-corner-bl { left: 10px;  border-width: 0 0 1px 1px; }
+  .proof-card:hover .proof-card-corner-br,
+  .proof-card:hover .proof-card-corner-bl { opacity: 1; }
+  .proof-card-index {
+    position: absolute;
+    top: 16px; right: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    color: rgba(255,255,255,0.07);
+    font-weight: 700;
+  }
+  .proof-card-partner {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    border: 1px solid rgba(255,255,255,0.08);
+    display: inline-block;
+    padding: 4px 10px;
+    background: #000;
+    margin-bottom: 24px;
+  }
+  .proof-card-title {
+    font-size: 2rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 16px;
+    transition: color 0.3s;
+  }
+  .proof-card:hover .proof-card-title { color: #2C59C3; }
+  .proof-card-desc {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.42);
+    font-weight: 300;
+    line-height: 1.65;
+    margin-bottom: 28px;
+  }
+  .proof-card-desc strong { color: #fff; font-weight: 900; }
+  .proof-card-metric {
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .proof-metric-line {
+    width: 20px; height: 1px;
+    background: #2C59C3;
+    flex-shrink: 0;
+  }
+  .proof-metric-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 4px 10px;
+    background: #000;
+  }
+</style>
+
+<section id="proof" class="border-t border-white/10 py-24 relative z-10" style="background:#0d0d14;">
+  <div class="proof-glow-inner"></div>
+
+  <!-- Header -->
+  <div class="max-w-6xl mx-auto px-6 md:px-12 lg:px-24 mb-16 text-center reveal" style="position:relative;z-index:2;">
+    <h2 class="text-4xl md:text-6xl font-black tracking-tightest uppercase text-white">Proof of Concept</h2>
+    <span class="font-mono text-accent text-sm tracking-widest uppercase block mt-4">How do we know this will work?</span>
+  </div>
+
+  <!-- Intro -->
+  <div class="max-w-6xl mx-auto px-6 md:px-12 lg:px-24 text-center mb-16 reveal" style="position:relative;z-index:2;">
+    <p class="text-2xl font-black uppercase tracking-tight text-white">We successfully ran <span class="text-accent">START Labs GovTech Edition</span> in 2025.</p>
+  </div>
+
+<!-- Stats bar — full bleed -->
+<div class="proof-stats-grid reveal" style="position:relative;z-index:2;text-align:center;">
+  <div class="proof-stat" style="order:1;">
+    <span class="proof-stat-num">3</span>
+    <span class="proof-stat-label">Challenge Partners</span>
+  </div>
+  <div class="proof-stat" style="order:3;">
+    <span class="proof-stat-num">3</span>
+    <span class="proof-stat-label">Startups</span>
+  </div>
+  <div class="proof-stat featured" style="order:2;">
+    <span class="proof-stat-num">1</span>
+    <span class="proof-stat-label">Bavarian Best Practice Award</span>
+  </div>   
+</div>
+
+  <!-- What did teams build divider -->
+  <div>
+    <br><br>
+  </div>
+
+<div class="flex md:hidden items-center gap-2 px-6 mb-3 text-gray-500 font-mono text-[11px] uppercase tracking-widest">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    <span>Swipe to see more</span>
+</div>
+
+<div class="flex gap-6 overflow-x-auto pb-6 mb-16 reveal carousel-scroll" style="scroll-snap-type: x mandatory;" vid="169">
+<div class="flex-shrink-0 w-[480px] h-[300px] rounded-none overflow-hidden relative group" style="scroll-snap-align:start;" vid="170">
+<img alt="Team working" class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105" src="https://raw.githubusercontent.com/genepearl/start-labs-2026/main/images/letter.JPG" vid="171"/>
+</div>
+<div class="flex-shrink-0 w-[480px] h-[300px] rounded-none overflow-hidden relative group" style="scroll-snap-align: start;" vid="172">
+<img alt="Healthcare tech" class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105" src="https://raw.githubusercontent.com/genepearl/start-labs-2026/main/images/demoday.jpg" vid="171"/>
+</div>
+<div class="flex-shrink-0 w-[480px] h-[300px] rounded-none overflow-hidden relative group" style="scroll-snap-align: start;" vid="174">
+<img alt="Presentation" class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105" src="https://raw.githubusercontent.com/genepearl/start-labs-2026/main/images/award.png" vid="175"/>
+</div>
+<div class="flex-shrink-0 w-[480px] h-[300px] rounded-none overflow-hidden relative group" style="scroll-snap-align: start;" vid="176">
+<img alt="Team collaboration" class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105" src="https://raw.githubusercontent.com/genepearl/start-labs-2026/main/images/winner.jpg" vid="175"/>
+</div>
+<div class="flex-shrink-0 w-[480px] h-[300px] rounded-none overflow-hidden relative group" style="scroll-snap-align: start;" vid="178">
+<img alt="Innovation lab" class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105" src="https://raw.githubusercontent.com/genepearl/start-labs-2026/main/images/partner.jpg" vid="175"/>
+</div>
+</div>
+
+<p class="font-mono text-accent text-sm tracking-widest uppercase block text-center mb-12">What did the teams build?</p>
+
+<!-- Project cards — full-bleed grid -->
+  <div class="proof-projects-grid">
+
+    <div class="proof-card reveal">
+      <div class="proof-card-corner-br"></div>
+      <div class="proof-card-corner-bl"></div>
+      <div class="proof-card-index">01 / 03</div>
+      <div class="proof-card-partner">Landratsamt Traunstein</div>
+      <div class="proof-card-title">DataNexus</div>
+      <p class="proof-card-desc">GDPR-compliant platform that saves <strong><br>3 working days</strong> per user per year.</br></p>
+    </div>
+
+    <div class="proof-card reveal" style="transition-delay:0.1s;">
+      <div class="proof-card-corner-br"></div>
+      <div class="proof-card-corner-bl"></div>
+      <div class="proof-card-index">02 / 03</div>
+      <div class="proof-card-partner">BayKommun</div>
+      <div class="proof-card-title">DiviData</div>
+      <p class="proof-card-desc">Built for a sector where <strong><br>70% of digital projects fail</strong>.</br></p>
+    </div>
+
+    <div class="proof-card reveal" style="transition-delay:0.2s;">
+      <div class="proof-card-corner-br"></div>
+      <div class="proof-card-corner-bl"></div>
+      <div class="proof-card-index">03 / 03</div>
+      <div class="proof-card-partner">Stadt Landshut</div>
+      <div class="proof-card-title">FileFlow</div>
+      <p class="proof-card-desc">Automated letter pipeline. <strong><br>€160,000</strong> annual savings.</br></p>
+    </div>
+
+  </div>
+
+</section>
+
+<section id="program" class="border-t border-white/10 py-24 relative z-10" style="background: linear-gradient(180deg, #0a0f1f 0%, #0d0d14 50%);">
+    
+    <div class="max-w-6xl mx-auto px-6 md:px-12 lg:px-24">
+        
+        <div class="mb-16 text-center">
+            <h2 class="text-4xl md:text-6xl font-black tracking-tightest uppercase text-white">The 8-Week Timeline</h2>
+            <span class="font-mono text-accent text-sm tracking-widest uppercase block mt-4">How it works?</span>
+        </div>
+
+        <div class="relative max-w-3xl mx-auto">
+            <div class="absolute left-6 top-6 bottom-6 w-[2px]" style="background: linear-gradient(to bottom, #2C59C3, #2C59C3 60%, rgba(44,89,195,0.1));"></div>
+            <div class="flex flex-col gap-4">
+
+                <div class="relative flex gap-6 items-start group">
+                    <div class="w-12 h-12 rounded-full bg-accent flex items-center justify-center flex-shrink-0 z-10">
+                        <span class="font-mono text-xs font-black text-white">01</span>
+                    </div>
+                    <div class="flex-1 border border-white/10 bg-white/[0.02] hover:border-accent transition-all duration-300 p-5 lg:p-6">
+                        <div class="font-mono text-xs text-white uppercase tracking-[0.15em] border border-white/10 inline-block px-3 py-1 bg-black mb-4 group-hover:border-white">Week 1</div>
+                        <h4 class="text-2xl font-black uppercase tracking-tight text-white mb-2 leading-tight group-hover:text-accent transition-colors">Onboarding Day</h4>
+                        <p class="text-gray-400 font-light text-sm leading-relaxed">Teams meet partners. Challenges are presented.</p>
+                    </div>
+                </div>
+
+                <div class="relative flex gap-6 items-start group">
+                    <div class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center flex-shrink-0 z-10 bg-[#0d0d14]">
+                        <span class="font-mono text-xs font-black text-accent">02</span>
+                    </div>
+                    <div class="flex-1 border border-white/10 hover:border-accent transition-all duration-300 p-5 lg:p-6">
+                        <div class="font-mono text-xs text-white uppercase tracking-[0.15em] border border-white/10 inline-block px-3 py-1 bg-black mb-4 group-hover:border-white">Weeks 2–6</div>
+                        <h4 class="text-2xl font-black uppercase tracking-tight text-white mb-4 leading-tight group-hover:text-accent transition-colors">Build Sprint</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div class="p-4 bg-white/[0.02] border border-white/10">
+                                <div class="font-mono text-xs text-white uppercase tracking-[0.15em] border border-white/10 inline-block px-3 py-1 bg-black mb-3 ">Expert Sessions</div>
+                                <p class="text-gray-400 font-light text-sm leading-relaxed">Your chance to ask questions and get advice from domain experts.</p>
+                            </div>
+                            <div class="p-4 bg-white/[0.02] border border-white/10">
+                                <div class="font-mono text-xs text-white uppercase tracking-[0.15em] border border-white/10 inline-block px-3 py-1 bg-black mb-3">Hacking Saturdays</div>
+                                <p class="text-gray-400 font-light text-sm leading-relaxed">Fixed time every week <br> to build with your team.</br></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative flex gap-6 items-start group">
+                    <div class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center flex-shrink-0 z-10 bg-[#0d0d14]">
+                        <span class="font-mono text-xs font-black text-accent">03</span>
+                    </div>
+                    <div class="flex-1 border border-white/10 bg-white/[0.02] hover:border-accent transition-all duration-300 p-5 lg:p-6">
+                        <div class="font-mono text-xs text-white uppercase tracking-[0.15em] border border-white/10 inline-block px-3 py-1 bg-black mb-4 group-hover:border-white">Week 4</div>
+                        <h4 class="text-2xl font-black uppercase tracking-tight text-white mb-2 leading-tight group-hover:text-accent transition-colors">Midterm Pitch</h4>
+                        <p class="text-gray-400 font-light text-sm leading-relaxed">Midway validation. Get real feedback on your work. Pivot or persevere based on evidence.</p>
+                    </div>
+                </div>
+
+                <div class="relative flex gap-6 items-start group">
+                    <div class="w-12 h-12 rounded-full bg-accent flex items-center justify-center flex-shrink-0 z-10">
+                        <span class="font-mono text-xs font-black text-white">04</span>
+                    </div>
+                    <div class="flex-1 border border-white/10 hover:border-accent transition-all duration-300 p-5 lg:p-6">
+                        <div class="font-mono text-xs text-white uppercase tracking-[0.15em] border border-white/10 inline-block px-3 py-1 bg-black mb-4 group-hover:border-white">Weeks 7–8</div>
+                        <h4 class="text-2xl font-black uppercase tracking-tight text-white mb-2 leading-tight group-hover:text-accent transition-colors">Final Pitch</h4>
+                        <p class="text-gray-400 font-light text-sm leading-relaxed">Prepare the pitch and present your product to partners and a live audience. Real stakes.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="border-t border-white/10 py-24 relative z-10 min-h-[70vh] flex flex-col items-center justify-center" id="apply" style="background:#0d0d14;">
+    <div class="max-w-6xl mx-auto px-6 md:px-12 lg:px-24 text-center w-full">
+
+        <h2 class="text-4xl md:text-6xl font-black tracking-tightest uppercase text-white mb-16">
+            The only wrong move<br>is
+            <span class="text-accent">not applying.</span>
+        </h2>
+
+        <div class="flex flex-col items-center gap-6">
+            <a href="https://tally.so/r/n9Axzp" class="group relative px-12 py-6 bg-white text-black font-black tracking-widest uppercase text-lg overflow-hidden transition-all hover:scale-105">
+                <span class="relative z-10 group-hover:text-white transition-colors duration-300">Apply Now</span>
+                <div class="absolute inset-0 h-full w-full bg-accent translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
+            </a>
+
+            <p class="font-mono text-xs text-white/30 uppercase tracking-widest mt-2">Apr 13 — May 1, 2026</p>
+        </div>
+
+    </div>
+</section>
+
+<footer class="py-8 border-t border-white/10 text-center" style="background:#0d0d14;">
+    <p class="font-mono text-xs text-gray-600 tracking-widest uppercase">START Labs © 2026. MedTech Edition.</p>
+</footer>
+
+<script vid="243">
+        document.addEventListener('DOMContentLoaded', () => {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.15
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.reveal, .diagnose-container').forEach((el) => {
+                observer.observe(el);
+            });
+        });
+    </script>
+</body></html>
