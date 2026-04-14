@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>START Labs — Brand Kit</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Montserrat:wght@300;400;700;900&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --c: #2dd4bf; --c-rgb: 45, 212, 191; }
+  body { background:#0A0A0F; color:#f3f4f6; font-family:'JetBrains Mono',monospace; display:flex; min-height:100vh; }
+
+  /* Panel */
+  .panel { width:320px; flex-shrink:0; border-right:1px solid rgba(255,255,255,0.08); padding:24px 16px; display:flex; flex-direction:column; gap:24px; position:sticky; top:0; height:100vh; overflow-y:auto; }
+  .panel-title { font-size:9px; letter-spacing:0.3em; text-transform:uppercase; color:rgba(255,255,255,0.25); margin-bottom:8px; }
+  input[type=range] { width:100%; -webkit-appearance:none; height:1px; background:rgba(255,255,255,0.15); outline:none; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:12px; height:12px; border-radius:50%; background:var(--c); cursor:pointer; border:2px solid #0A0A0F; }
+  .slider-row { display:flex; align-items:center; gap:8px; }
+  .sval { font-size:10px; color:var(--c); min-width:36px; text-align:right; }
+  .stroke-btns { display:flex; gap:4px; }
+  .sbtn { flex:1; padding:6px 2px; font-family:inherit; font-size:9px; letter-spacing:0.1em; cursor:pointer; border:1px solid rgba(255,255,255,0.1); background:transparent; color:rgba(255,255,255,0.4); text-align:center; transition:all .15s; }
+  .sbtn:hover { color:#fff; border-color:rgba(255,255,255,0.3); }
+  .sbtn.active { color:var(--c); border-color:var(--c); }
+  .swatches { display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:6px; width:100%; }
+  .sw-item { display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .sw { width:26px; height:26px; border-radius:2px; cursor:pointer; border:2px solid transparent; transition:border-color .15s, transform .15s; }
+  .sw:hover { transform:scale(1.1); }
+  .sw.active { border-color:#fff; }
+  .sw-lbl { font-size:6px; color:rgba(255,255,255,0.3); text-align:center; line-height:1.15; word-break:break-word; }
+  .custom-row { display:flex; align-items:center; gap:6px; margin-top:4px; }
+  input[type=color] { width:28px; height:28px; border:1px solid rgba(255,255,255,0.15); border-radius:2px; background:none; cursor:pointer; padding:2px; }
+  .clbl { font-size:9px; color:rgba(255,255,255,0.3); }
+
+  /* Canvas */
+  .canvas { flex:1; overflow-y:auto; padding:48px 64px; display:flex; flex-direction:column; gap:64px; }
+
+  /* Section label */
+  .section-label { font-size:9px; letter-spacing:0.3em; text-transform:uppercase; color:rgba(255,255,255,0.2); margin-bottom:24px; display:flex; align-items:center; gap:12px; }
+  .section-label::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.06); }
+
+  /* Logo lockup */
+  .logo-lockup { display:flex; flex-direction:row; align-items:center; gap:15px; }
+  .wordmark-block { display:flex; flex-direction:column; gap:4px; }
+  #wordmark { font-family:'Montserrat',sans-serif; font-weight:900; letter-spacing:-0.04em; text-transform:uppercase; color:#fff; line-height:1; white-space:nowrap; }
+  #subline { font-family:'JetBrains Mono',monospace; font-weight:400; text-transform:uppercase; letter-spacing:0.2em; line-height:1; white-space:nowrap; color:var(--c); }
+
+  /* Typography samples */
+  .type-stack { display:flex; flex-direction:column; gap:32px; }
+  .type-row { display:flex; align-items:baseline; gap:24px; }
+  .type-meta { font-size:9px; color:rgba(255,255,255,0.2); letter-spacing:0.15em; min-width:120px; }
+
+  .t-hero { font-family:'Montserrat',sans-serif; font-weight:900; font-size:72px; line-height:0.9; letter-spacing:-0.075em; text-transform:uppercase; color:#fff; }
+  .t-h1 { font-family:'Montserrat',sans-serif; font-weight:900; font-size:48px; line-height:0.9; letter-spacing:-0.04em; text-transform:uppercase; color:#fff; }
+  .t-h2 { font-family:'Montserrat',sans-serif; font-weight:900; font-size:32px; line-height:1; letter-spacing:-0.03em; text-transform:uppercase; color:#fff; }
+  .t-accent { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.25em; text-transform:uppercase; }
+  .t-body { font-family:'Montserrat',sans-serif; font-size:15px; font-weight:300; line-height:1.65; color:rgba(255,255,255,0.5); max-width:420px; }
+  
+  .t-mono { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.15em; text-transform:uppercase; color:rgba(255,255,255,0.4); }
+
+  /* White text with gradient glow underneath */
+  .white-glow-wrap { position:relative; display:inline-block; }
+  .white-glow-wrap::before {
+    content:'';
+    position:absolute;
+    left:-0.08em;
+    right:-0.08em;
+    bottom:0.08em;
+    height:0.42em;
+    background:linear-gradient(90deg, color-mix(in srgb, var(--c) 85%, white 15%) 0%, rgba(var(--c-rgb),0.22) 100%);
+    filter:blur(10px);
+    opacity:0.85;
+    z-index:0;
+    pointer-events:none;
+  }
+  .white-glow-text {
+    position:relative;
+    z-index:1;
+    color:#fff;
+    text-shadow:0 0 10px rgba(255,255,255,0.04);
+  }
+  .glow-sample {
+    font-family:'Montserrat',sans-serif;
+    font-weight:900;
+    font-size:40px;
+    line-height:0.95;
+    letter-spacing:-0.04em;
+    text-transform:uppercase;
+  }
+
+  /* Buttons */
+  .btn-row { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .btn-primary { position:relative; padding:16px 40px; background:#000; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.25em; text-transform:uppercase; border:1px solid rgba(var(--c-rgb),0.4); cursor:pointer; overflow:hidden; transition:all .3s; color:var(--c); }
+  .btn-primary:hover { color:#000; background:var(--c); border-color:var(--c); }
+  .btn-nav { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.15em; text-transform:uppercase; padding:8px 12px; border:1px solid rgba(255,255,255,0.12); background:#000; color:#fff; cursor:pointer; }
+  .btn-nav:hover { border-color:rgba(255,255,255,0.3); }
+
+  /* Tag/badge */
+  .tag { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.15em; text-transform:uppercase; border:1px solid rgba(255,255,255,0.12); display:inline-block; padding:5px 12px; background:#000; color:#fff; }
+
+  /* Card */
+  .card-row { display:flex; gap:24px; flex-wrap:wrap; }
+  .card {
+  border:1px solid rgba(255,255,255,0.08);
+  padding:32px 28px;
+  background:#0d0d14;
+  flex:1;
+  min-width:200px;
+  position:relative;
+  overflow:hidden;
+  transition: all 0.35s ease;
+}
+
+.card::before {
+  content:'';
+  position:absolute;
+  top:0; left:0; right:0;
+  height:2px;
+  background:var(--c);
+  transform:scaleX(0);
+  transform-origin:left;
+  transition:transform .4s;
+}
+
+.card::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  background: radial-gradient(circle at top right, rgba(var(--c-rgb),0.12), transparent 60%);
+  opacity:0;
+  transition: opacity 0.35s ease;
+  pointer-events:none;
+}
+
+.card:hover::before { transform:scaleX(1); }
+.card:hover::after { opacity:1; }
+
+.card:hover {
+  background:#12121A;
+  border-color: rgba(var(--c-rgb),0.35);
+  transform: translateY(-4px);
+}
+
+.card:hover .card-title {
+  color: var(--c);
+}
+
+/* sweep effect */
+.card .card-scan {
+  content:'';
+  position:absolute;
+  inset:0;
+  background: linear-gradient(120deg, transparent 40%, rgba(255,255,255,0.04), transparent 60%);
+  opacity:0;
+  transform: translateX(-40%);
+  transition: all 0.6s ease;
+  pointer-events:none;
+}
+
+.card:hover .card-scan {
+  opacity:1;
+  transform: translateX(40%);
+}
+
+/* isolation */
+.card-row:hover .card { opacity:0.35; }
+.card-row:hover .card:hover { opacity:1; }
+
+  .card-title { font-family:'Montserrat',sans-serif; font-weight:900; font-size:24px; letter-spacing:-0.03em; text-transform:uppercase; color:#fff; margin-bottom:8px; }
+  .card-desc { font-family:'Montserrat',sans-serif; font-size:13px; font-weight:300; color:rgba(255,255,255,0.4); line-height:1.6; }
+
+  /* Stat */
+  .stat-row { display:flex; gap:0; }
+
+.stat-row--compact {
+  width:min(100%, 540px);
+}
+
+.stat { border-right:1px solid rgba(255,255,255,0.08); border-bottom:1px solid rgba(255,255,255,0.08); }
+.stat:last-child { border-right:1px solid rgba(255,255,255,0.08); }
+
+.stat-row:hover .stat {
+  opacity:0.4;
+}
+
+.stat-row:hover .stat:hover {
+  opacity:1;
+}
+  .stat {
+  border:1px solid rgba(255,255,255,0.08);
+  background:#0d0d14;
+  flex:1;
+  aspect-ratio:1 / 1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  overflow:hidden;
+  transition: all 0.3s ease;
+  cursor:default;
+}
+
+.stat::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  background: rgba(var(--c-rgb),0.06);
+  opacity:0;
+  transition: opacity 0.3s ease;
+}
+
+.stat:hover::after {
+  opacity:1;
+}
+
+.stat:hover {
+  border-color: var(--c);
+}
+.stat:hover::before {
+  border-color: var(--c);
+}
+
+.stat:hover .stat-num {
+  color: var(--c);
+}
+  .stat-num {
+  font-family:'Montserrat',sans-serif;
+  font-weight:900;
+  font-size:40px;
+  letter-spacing:-0.04em;
+  line-height:1;
+  margin-bottom:8px;
+  position:relative;
+  z-index:1;
+}
+  .stat-lbl {
+  font-family:'JetBrains Mono',monospace;
+  font-size:8px;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,0.4);
+  position:relative;
+  z-index:1;
+  text-align:center;
+  max-width:80%;
+}
+
+  /* Timeline dot */
+      .timeline {
+    position:relative;
+    padding-left:64px;
+    display:flex;
+    flex-direction:column;
+    gap:28px;
+  }
+              .timeline::before {
+    display: none;
+  }
+      .tl-item {
+    position: relative;
+    padding-left: 72px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    overflow: visible;
+  }
+      .tl-item::after {
+    content:'';
+    position:absolute;
+    top:0;
+    right:0;
+    bottom:0;
+    left:48px;
+    background:rgba(var(--c-rgb),0.06);
+    border:1px solid rgba(var(--c-rgb),0.16);
+    opacity:0;
+    transition:opacity 0.25s ease, border-color 0.25s ease;
+    pointer-events:none;
+  }
+  .timeline:hover   .tl-item {
+    position: relative;
+    padding-left: 72px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    overflow: visible;
+  }
+  .timeline:hover .tl-item:hover { opacity:1; }
+  .tl-item:hover {
+    transform:translateX(3px);
+  }
+  .tl-item:hover::after {
+    opacity:1;
+  }
+              .tl-dot {
+    box-shadow: 0 0 0 4px rgba(var(--c-rgb),0.08);
+    position:absolute;
+    left:18px;
+    top:50%;
+    transform:translate(-50%, -50%);
+    width:24px;
+    height:24px;
+    border-radius:50%;
+    border:2px solid var(--c);
+    background:#0A0A0F;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:2;
+    transition:border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  }
+  .tl-dot-inner {
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--c);
+    transition:background 0.25s ease, transform 0.25s ease;
+  }
+      .tl-label {
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    margin: 0 0 6px 0;
+    color:rgba(255,255,255,0.7);
+    position:relative;
+    z-index:1;
+    transition:color 0.25s ease;
+  }
+      .tl-title {
+    font-family:'Montserrat',sans-serif;
+    font-weight:900;
+    font-size:22px;
+    text-transform:uppercase;
+    letter-spacing:-0.03em;
+    line-height:1;
+    margin:0;
+    color:#fff;
+    position:relative;
+    z-index:1;
+    transition:color 0.25s ease;
+  }
+
+  .tl-item:hover .tl-title {
+  color: var(--c);
+}
+
+
+  
+  .tl-item:hover             .tl-dot {
+    box-shadow: 0 0 0 4px rgba(var(--c-rgb),0.08);
+    position:absolute;
+    left:18px;
+    top:50%;
+    transform:translate(-50%, -50%);
+    width:24px;
+    height:24px;
+    border-radius:50%;
+    border:2px solid var(--c);
+    background:#0A0A0F;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:2;
+    transition:border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  }
+  .tl-item:hover .tl-dot-inner {
+    background:var(--c);
+    transform:scale(1.15);
+  }
+
+  /* Scan line decoration */
+  .scan-tag { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.3em; text-transform:uppercase; padding:4px 8px; border:1px solid rgba(var(--c-rgb),0.3); display:inline-block; }
+
+  /* Color info strip */
+  .color-strip { font-size:9px; letter-spacing:0.2em; color:rgba(255,255,255,0.15); text-transform:uppercase; margin-top:8px; }
+</style>
+</head>
+<body>
+
+<!-- Controls -->
+<div class="panel">
+  <div>
+    <div class="panel-title">Size</div>
+    <div class="slider-row">
+      <input type="range" id="size-slider" min="40" max="240" value="100" step="1"/>
+      <span class="sval" id="size-val">100px</span>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel-title">Stroke</div>
+    <div class="stroke-btns">
+      <button class="sbtn" data-stroke="0.7">Thin</button>
+      <button class="sbtn active" data-stroke="1.5">Mid</button>
+      <button class="sbtn" data-stroke="2.8">Bold</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel-title">Colour</div>
+    
+    
+    <div class="swatches" id="swatches">
+
+      <div class="sw-item"><div class="sw active" data-color="#2dd4bf" style="background:#2dd4bf;"></div><div class="sw-lbl">Teal</div></div>
+      <div class="sw-item"><div class="sw" data-color="#BEF264" style="background:#BEF264;"></div><div class="sw-lbl">Lime Alert</div></div>
+      <div class="sw-item"><div class="sw" data-color="#26c6da" style="background:#26c6da;"></div><div class="sw-lbl">Cyan</div></div>
+      <div class="sw-item"><div class="sw" data-color="#1fb2a6" style="background:#1fb2a6;"></div><div class="sw-lbl">Deep Teal</div></div>
+      <div class="sw-item"><div class="sw" data-color="#5eead4" style="background:#5eead4;"></div><div class="sw-lbl">Mint</div></div>
+  
+
+      <div class="sw-item"><div class="sw" data-color="#60a5fa" style="background:#60a5fa;"></div><div class="sw-lbl">Light Scan</div></div>
+      <div class="sw-item"><div class="sw" data-color="#1976d2" style="background:#1976d2;"></div><div class="sw-lbl">X-Ray</div></div>
+      <div class="sw-item"><div class="sw" data-color="#3b82f6" style="background:#3b82f6;"></div><div class="sw-lbl">Scan</div></div>
+      <div class="sw-item"><div class="sw" data-color="#2563eb" style="background:#2563eb;"></div><div class="sw-lbl">Core Blue</div></div>
+      <div class="sw-item"><div class="sw" data-color="#1D4ED8" style="background:#1D4ED8;"></div><div class="sw-lbl">Deep Scan</div></div>
+
+      <div class="sw-item"><div class="sw" data-color="#0468CD" style="background:#0468CD;"></div><div class="sw-lbl">Cleveland</div></div>
+      <div class="sw-item"><div class="sw" data-color="#0284c7" style="background:#0284c7;"></div><div class="sw-lbl">Device Blue</div></div>
+      <div class="sw-item"><div class="sw" data-color="#0ea5e9" style="background:#0ea5e9;"></div><div class="sw-lbl">Interface</div></div>
+      <div class="sw-item"><div class="sw" data-color="#38bdf8" style="background:#38bdf8;"></div><div class="sw-lbl">Glow Blue</div></div>
+      <div class="sw-item"><div class="sw" data-color="#075985" style="background:#075985;"></div><div class="sw-lbl">Deep Device</div></div>
+
+      <div class="sw-item"><div class="sw" data-color="#ff0033" style="background:#ff0033;"></div><div class="sw-lbl">Haemo</div></div>
+      <div class="sw-item"><div class="sw" data-color="#ef4444" style="background:#ef4444;"></div><div class="sw-lbl">Pulse</div></div>
+      <div class="sw-item"><div class="sw" data-color="#dc2626" style="background:#dc2626;"></div><div class="sw-lbl">Core Red</div></div>
+      <div class="sw-item"><div class="sw" data-color="#f87171" style="background:#f87171;"></div><div class="sw-lbl">Light Pulse</div></div>
+      <div class="sw-item"><div class="sw" data-color="#ff6b6b" style="background:#ff6b6b;"></div><div class="sw-lbl">Soft Red</div></div>
+
+      <div class="sw-item"><div class="sw" data-color="#ff0033" style="background:#ff0033;"></div><div class="sw-lbl">Haemo</div></div> 
+      <div class="sw-item"><div class="sw" data-color="#ff1a1a" style="background:#ff1a1a;"></div><div class="sw-lbl">Bright Red</div></div> 
+      <div class="sw-item"><div class="sw" data-color="#e11d1d" style="background:#e11d1d;"></div><div class="sw-lbl">Core Red</div></div> 
+      <div class="sw-item"><div class="sw" data-color="#c81e1e" style="background:#c81e1e;"></div><div class="sw-lbl">Strong Red</div></div> 
+      <div class="sw-item"><div class="sw" data-color="#7C3AED" style="background:#7C3AED;"></div><div class="sw-lbl">Electric Violet</div></div> 
+    </div>
+
+    <div class="custom-row">
+      <input type="color" id="custom-color" value="#2dd4bf"/>
+      <span class="clbl">Custom</span>
+    </div>
+    <div class="color-strip" id="color-strip">#2DD4BF</div>
+  </div>
+</div>
+
+<!-- Brand canvas -->
+<div class="canvas">
+
+  <!-- Logo -->
+  <div>
+    <div class="section-label">Logo</div>
+    <div class="logo-lockup" id="logo-lockup">
+      <svg id="logo-svg" viewBox="0 0 72 118" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path id="p1" d="M36 18 C26 18 16 36 16 62 L56 62 C56 36 46 18 36 18Z" stroke="#2dd4bf" stroke-width="1.5"/>
+        <circle id="p2" cx="36" cy="44" r="9" stroke="#2dd4bf" stroke-width="1.6"/>
+        <circle id="p3" cx="36" cy="44" r="4.5" stroke="#2dd4bf" stroke-opacity="0.6" stroke-width="1"/>
+        <rect id="p4" x="16" y="62" width="40" height="14" stroke="#2dd4bf" stroke-width="1.5"/>
+        <path id="p5" d="M16 65 L2 86 L16 76Z" stroke="#2dd4bf" stroke-width="1.5"/>
+        <path id="p6" d="M56 65 L70 86 L56 76Z" stroke="#2dd4bf" stroke-width="1.5"/>
+        <path id="p7" d="M24 76 Q36 84 48 76" stroke="#2dd4bf" stroke-opacity="0.8" stroke-width="1.2"/>
+        <ellipse id="p8" cx="36" cy="90" rx="6" ry="10" stroke="#2dd4bf" stroke-opacity="0.6" stroke-width="1.2"/>
+        <ellipse id="p9" cx="36" cy="94" rx="3" ry="5.5" stroke="#2dd4bf" stroke-width="1.4"/>
+      </svg>
+      <div class="wordmark-block" id="wordmark-block">
+        <div id="wordmark">START Labs</div>
+        <div id="subline">// MedTech Edition</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Typography -->
+  <div>
+    <div class="section-label">Typography</div>
+    <div class="type-stack">
+      <div class="type-row">
+        <div class="type-meta">Hero / Display</div>
+        <div class="t-hero accent-text">Are you<br>cracked?</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">H1 Section</div>
+        <div class="t-h1 accent-text">The Builder</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">H2 Card</div>
+        <div class="t-h2 accent-text">Healthcare<br>Partner</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">Mono Label</div>
+        <div class="t-accent accent-text">// MedTech Edition</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">Body</div>
+        <div class="t-body">Knows the problem inside out, but lacks the technical skills to build a solution.</div>
+      </div>
+      <div class="type-row">
+      </div>
+      <div class="type-row">
+        <div class="type-meta">Mono small</div>
+        <div class="t-mono">Apr 13 - May 1, 2026</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Buttons & Tags -->
+  <div>
+    <div class="section-label">Buttons &amp; Tags</div>
+    <div style="display:flex; flex-direction:column; gap:20px;">
+      <div class="btn-row">
+        <button class="btn-primary">Apply Now</button>
+        <button class="btn-nav">About</button>
+      </div>
+      <div class="btn-row">
+        <span class="tag accent-border accent-text">// Signal Acquired</span>
+        <span class="tag accent-border">Technical Talent</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cards -->
+  <div>
+    <div class="section-label">Cards</div>
+    <div class="card-row">
+      <div class="card"><div class="card-scan"></div>
+        <div class="tag" style="margin-bottom:20px; font-size:9px;">Landratsamt Traunstein</div>
+        <div class="card-title">DataNexus</div>
+        <div class="card-desc">GDPR-compliant platform. 3 days saved per user yearly.</div>
+      </div>
+      <div class="card"><div class="card-scan"></div>
+        <div class="tag" style="margin-bottom:20px; font-size:9px;">BayKommun</div>
+        <div class="card-title">DiviData</div>
+        <div class="card-desc">Built for a sector where 70% of digital projects fail.</div>
+      </div>
+      <div class="card"><div class="card-scan"></div>
+        <div class="tag" style="margin-bottom:20px; font-size:9px;">Stadt Landshut</div>
+        <div class="card-title">FileFlow</div>
+        <div class="card-desc">Automated letter pipeline. €160,000 annual savings.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div>
+    <div class="section-label">Stats</div>
+    <div class="stat-row stat-row--compact">
+      <div class="stat"><div class="stat-num accent-text">3</div><div class="stat-lbl">Challenges</div></div>
+      <div class="stat"><div class="stat-num accent-text">1</div><div class="stat-lbl">Bavarian Best Practice Award</div></div>
+      <div class="stat"><div class="stat-num accent-text">3</div><div class="stat-lbl">Startups</div></div>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div>
+    <div class="section-label">Timeline</div>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot"><div class="tl-dot-inner"></div></div>
+        <div class="tl-title">Onboarding Day</div>
+        <div class="t-body">Teams meet partners. Challenges are presented.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"><div class="tl-dot-inner"></div></div>
+        <div class="tl-title">Expert Sessions</div>
+        <div class="t-body">Your chance to ask questions.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let currentColor = '#2dd4bf';
+  let currentSize = 100;
+  const baseStrokes = [1.5,1.6,1,1.5,1.5,1.5,1.2,1.2,1.4];
+
+  function hexToRgbString(hex) {
+    const clean = hex.replace('#', '');
+    const full = clean.length === 3 ? clean.split('').map(ch => ch + ch).join('') : clean;
+    const num = parseInt(full, 16);
+    const r = (num >> 16) & 255;
+    const g = (num >> 8) & 255;
+    const b = num & 255;
+    return `${r}, ${g}, ${b}`;
+  }
+
+  function applyColor(c) {
+    currentColor = c;
+    document.documentElement.style.setProperty('--c', c);
+    document.documentElement.style.setProperty('--c-rgb', hexToRgbString(c));
+    ['p1','p2','p3','p4','p5','p6','p7','p8','p9'].forEach(id => {
+      document.getElementById(id).setAttribute('stroke', c);
+    });
+    document.getElementById('subline').style.color = c;
+    document.querySelectorAll('.accent-text').forEach(el => el.style.color = c);
+    document.querySelectorAll('.accent-border').forEach(el => el.style.borderColor = c);
+    document.querySelectorAll('.tl-dot').forEach(el => el.style.borderColor = c);
+    document.querySelectorAll('.tl-dot-inner').forEach(el => el.style.background = c);
+    
+    document.querySelector('.btn-primary').style.borderColor = c;
+    document.getElementById('color-strip').textContent = c.toUpperCase();
+  }
+
+  function applySize(s) {
+    currentSize = s;
+    const svg = document.getElementById('logo-svg');
+    const wordmark = document.getElementById('wordmark');
+    const subline = document.getElementById('subline');
+    const lockup = document.getElementById('logo-lockup');
+    const wordmarkBlock = document.getElementById('wordmark-block');
+
+    svg.style.width = s + 'px';
+    svg.style.height = (s * 118 / 72) + 'px';
+
+    wordmark.style.fontSize = (s * 0.35) + 'px';
+    subline.style.fontSize = (s * 0.14) + 'px';
+
+    lockup.style.gap = (s * 0.15) + 'px';
+    wordmarkBlock.style.gap = (s * 0.04) + 'px';
+    subline.style.marginTop = (s * 0.01) + 'px';
+
+    document.getElementById('size-val').textContent = s + 'px';
+  }
+
+  function applyStroke(sw) {
+    const ratio = sw / 1.5;
+    ['p1','p2','p3','p4','p5','p6','p7','p8','p9'].forEach((id,i) => {
+      document.getElementById(id).setAttribute('stroke-width', (baseStrokes[i]*ratio).toFixed(2));
+    });
+  }
+
+  document.getElementById('size-slider').addEventListener('input', e => applySize(+e.target.value));
+
+  document.querySelectorAll('.sw').forEach(sw => {
+    sw.addEventListener('click', () => {
+      document.querySelectorAll('.sw').forEach(s => s.classList.remove('active'));
+      sw.classList.add('active');
+      applyColor(sw.dataset.color);
+      document.getElementById('custom-color').value = sw.dataset.color;
+    });
+  });
+
+  document.getElementById('custom-color').addEventListener('input', e => {
+    document.querySelectorAll('.sw').forEach(s => s.classList.remove('active'));
+    applyColor(e.target.value);
+  });
+
+  document.querySelectorAll('.sbtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sbtn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyStroke(+btn.dataset.stroke);
+    });
+  });
+
+  applySize(100);
+  applyColor('#2dd4bf');
+
+  document.getElementById('download-btn').addEventListener('click', () => {
+    const html = document.documentElement.outerHTML;
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'start-labs-brand-kit.html';
+    a.click();
+
+    URL.revokeObjectURL(url);
+  });
+
+</script>
+</body>
+</html>
